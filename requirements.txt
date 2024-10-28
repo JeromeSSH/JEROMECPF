@@ -11,3 +11,4 @@ numpy
 plotly
 crewai
 crewai_tools
+streamlit-mermaid
