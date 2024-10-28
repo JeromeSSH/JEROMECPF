@@ -36,6 +36,16 @@ def is_cpf_related(query):
     query_words = set(query.lower().split())
     return bool(query_words.intersection(CPF_KEYWORDS))
 
+def get_openai_api_key():
+    api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        st.error("No OpenAI API key found. Please set it in .streamlit/secrets.toml or as an environment variable.")
+        st.stop()
+    return api_key
+
+# Initialize the OpenAI client with the desired model
+openai.api_key = get_openai_api_key()
+
 def get_openai_response(query, context):
     """Get response from OpenAI as a fallback"""
     try:
@@ -49,7 +59,8 @@ def get_openai_response(query, context):
             {"role": "user", "content": f"Context: {context}\n\nQuery: {query}"}
         ]
 
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
             messages=messages,
             temperature=0.5,
             max_tokens=1000
