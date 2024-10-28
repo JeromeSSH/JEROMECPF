@@ -191,7 +191,7 @@ def get_relevant_content_from_urls(urls):
     return content_list
 
 # Create custom WebsiteSearchTool for CPF content
-class CPFWebsiteSearchTool():
+#class CPFWebsiteSearchTool():
     def __init__(self, base_urls=None):
         super().__init__(base_urls if base_urls else CPF_URLS["housing_policies"][0])
         self.all_urls = [url for urls in CPF_URLS.values() for url in urls]
@@ -210,7 +210,7 @@ class CPFWebsiteSearchTool():
         return combined_content
 
 # Create tools with enhanced CPF search capability
-tool_cpf_search = CPFWebsiteSearchTool()
+#tool_cpf_search = CPFWebsiteSearchTool()
 
 # CrewAI Agents with improved tools and capabilities
 agent_researcher = Agent(
@@ -219,7 +219,7 @@ agent_researcher = Agent(
     backstory="""You're a specialized researcher focusing on CPF housing policies and regulations.
     You have access to the latest CPF housing information and can analyze complex policy details.
     You always verify information from official CPF sources and provide accurate, up-to-date information.""",
-    tools=[tool_cpf_search],
+#    tools=[tool_cpf_search],
     allow_delegation=False,
     verbose=True
 )
@@ -251,7 +251,7 @@ def create_crew_tasks(user_query):
         3. Gather supporting information from official CPF sources
         """,
         agent=agent_researcher,
-        tools=[tool_cpf_search],
+#        tools=[tool_cpf_search],
         async_execution=True
     )
 
