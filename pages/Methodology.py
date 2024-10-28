@@ -171,7 +171,7 @@ def show_methodology_page():
         3. **Calculate Contributions**:
            - Utilizing CPF contribution rates based on the user's age group, calculate expected contributions over time.
        
-        4. **Estimate Growth Based on Rates**:
+        4. **Estimate Growth Based on Rates**a:
            - Apply the latest interest rates for Ordinary, Special, and MediSave Accounts to forecast growth, incorporating compound interest for more accurate projections.
        
         5. **Generate Projections Report**:

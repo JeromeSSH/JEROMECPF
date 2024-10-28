@@ -376,6 +376,34 @@ if st.session_state.authenticated:
 
     st.title("Enhanced CPF Information Hub")
 
+    # Help Button
+if st.button("❓ Help"):
+    st.write("### Help & How to Use This App")
+    st.write("Welcome to the CPF Information Hub! Here’s how to effectively use this application:")
+
+    # Provide a brief guide
+    st.header("How to Use the App")
+    st.write("""
+    1. **Ask Your CPF Question**: Use the text area to enter any question related to CPF policies, housing, loans, or retirement.
+    2. **Get Answers**: After submitting your question, the AI will provide a comprehensive response based on official CPF sources.
+    3. **Review Previous Questions**: You can view your previous questions and the AI's answers for reference.
+    """)
+
+    # Example Questions
+    st.header("Example Questions")
+    st.write("Here are some example questions you can ask:")
+    example_questions = [
+        "How do I use my CPF savings to purchase a home?",
+        "What are the differences between HDB loans and bank loans?",
+        "Can I use my CPF for downpayment on a private property?",
+        "What are the different CPF account types and their purposes?",
+        "How does the CPF Ordinary Account interest rate compare to the Special Account?",
+        "What grants are available for first-time homebuyers using CPF?",
+    ]
+    
+    for question in example_questions:
+        st.write(f"- {question}")
+
     # Navigation
     page = st.sidebar.selectbox("Select a page", ["Home", "Methodology", "Calculator", "Projections"])
     
