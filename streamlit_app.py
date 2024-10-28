@@ -50,9 +50,9 @@ def get_openai_response(query, context):
         ]
 
         response = client.chat.completions.create(
-            model="gpt-4-turbo-preview",  # or another appropriate model
+            model="gpt-4o-mini",  # or another appropriate model
             messages=messages,
-            temperature=0.7,
+            temperature=0.5,
             max_tokens=1000
         )
 
