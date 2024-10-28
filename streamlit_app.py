@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import tiktoken
 from crewai import Agent, Task, Crew, Process
-from crewai_tools import WebsiteSearchTool
+from crewai_tools
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
