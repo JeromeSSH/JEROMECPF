@@ -9,6 +9,13 @@ from crewai import Agent, Task, Crew, Process
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+# Streamlit UI
+st.set_page_config(
+    layout="centered",
+    page_title="Enhanced CPF Information Hub",
+    page_icon="🏠"
+)
+
 # Access the password from the secrets
 stored_password = st.secrets["password"]
 
@@ -359,12 +366,7 @@ def process_user_message(user_input):
             except Exception as e2:
                 return f"I apologize, but I encountered an error processing your request: {str(e2)}"
 
-# Streamlit UI
-st.set_page_config(
-    layout="centered",
-    page_title="Enhanced CPF Information Hub",
-    page_icon="🏠"
-)
+
 
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
