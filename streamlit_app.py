@@ -10,22 +10,58 @@ from crewai_tools import WebsiteSearchTool
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+
 # Load environment variables
 load_dotenv()
 
 # Initialize OpenAI client with flexible secret management
 def get_openai_api_key():
-    try:
-        return st.secrets["OPENAI_API_KEY"]
-    except Exception:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            st.error("No OpenAI API key found. Please set it in .streamlit/secrets.toml or as an environment variable.")
-            st.stop()
-        return api_key
+    api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        st.error("No OpenAI API key found. Please set it in .streamlit/secrets.toml or as an environment variable.")
+        st.stop()
+    return api_key
 
 # Initialize the OpenAI client
 client = OpenAI(api_key=get_openai_api_key())
+
+# CPF-related keywords for query validation
+CPF_KEYWORDS = {
+    'cpf', 'central provident fund', 'housing', 'hdb', 'bto', 'resale', 
+    'mortgage', 'loan', 'interest', 'property', 'retirement', 'medisave',
+    'ordinary account', 'special account', 'retirement account', 'home ownership',
+    'public housing', 'private property', 'downpayment', 'grant'
+}
+
+def is_cpf_related(query):
+    """Check if the query is CPF-related based on keywords"""
+    query_words = set(query.lower().split())
+    return bool(query_words.intersection(CPF_KEYWORDS))
+
+def get_openai_response(query, context):
+    """Get response from OpenAI as a fallback"""
+    try:
+        system_prompt = """You are a CPF (Central Provident Fund) specialist assistant. 
+        Provide accurate, helpful information about CPF policies and regulations.
+        Base your response on the context provided, and clearly indicate if you're unsure about any information.
+        Format your response in a clear, structured manner."""
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Context: {context}\n\nQuery: {query}"}
+        ]
+
+        response = client.chat.completions.create(
+            model="gpt-4-turbo-preview",  # or another appropriate model
+            messages=messages,
+            temperature=0.7,
+            max_tokens=1000
+        )
+
+        return response.choices[0].message.content
+
+    except Exception as e:
+        return f"Error getting OpenAI response: {str(e)}"
 
 CPF_URLS = {
     "housing_policies": [
@@ -255,71 +291,70 @@ def process_crew_query(user_query):
 
 # Enhanced process_user_message function
 def process_user_message(user_input):
+    """Process user message with CrewAI and fallback to OpenAI if needed"""
+    if not is_cpf_related(user_input):
+        return "I apologize, but I can only answer questions related to CPF (Central Provident Fund). Please ask a CPF-related question."
+
     with st.spinner('Processing your query...'):
         try:
-            # Get CrewAI response
+            # First attempt with CrewAI
             crew_response = process_crew_query(user_input)
-            
-            # Get traditional response
             relevant_urls = identify_relevant_url(user_input)
-            traditional_response = ""
-            if relevant_urls:
-                relevant_content = get_relevant_content_from_urls(relevant_urls)
-                if relevant_content:
-                    traditional_response = generate_response_based_on_content(user_input, relevant_content)
+            relevant_content = get_relevant_content_from_urls(relevant_urls)
             
-            # Combine responses with proper formatting
-            combined_response = f"""
-            ### AI Analysis
-            {crew_response}
-            
-            ### Additional Information
-            {traditional_response if traditional_response else 'No additional information found in traditional sources.'}
-            """
-            return combined_response
-            
-        except Exception as e:
-            st.error(f"An error occurred while processing your query: {str(e)}")
-            return "I apologize, but I encountered an error while processing your request. Please try again."
+            if crew_response and not crew_response.lower().startswith("i apologize") and not crew_response.lower().startswith("error"):
+                combined_response = f"### AI Analysis\n{crew_response}\n\n### Sources\n" + \
+                    "\n".join([f"- {item['url']}" for item in relevant_content])
+                return combined_response
 
+            # Fallback to OpenAI if CrewAI fails
+            context = "\n\n".join([item['content'] for item in relevant_content])
+            openai_response = get_openai_response(user_input, context)
+            
+            combined_response = f"### AI Response (Fallback)\n{openai_response}\n\n### Sources\n" + \
+                "\n".join([f"- {item['url']}" for item in relevant_content])
+            return combined_response
+
+        except Exception as e:
+            st.warning("CrewAI processing failed, falling back to OpenAI...")
+            try:
+                # Final fallback to OpenAI
+                relevant_urls = identify_relevant_url(user_input)
+                relevant_content = get_relevant_content_from_urls(relevant_urls)
+                context = "\n\n".join([item['content'] for item in relevant_content])
+                openai_response = get_openai_response(user_input, context)
+                
+                combined_response = f"### AI Response (Fallback)\n{openai_response}\n\n### Sources\n" + \
+                    "\n".join([f"- {item['url']}" for item in relevant_content])
+                return combined_response
+            except Exception as e2:
+                return f"I apologize, but I encountered an error processing your request: {str(e2)}"
 
 # Streamlit UI
 st.set_page_config(
     layout="centered",
-    page_title="Enhanced CPF Housing Information Hub",
+    page_title="Enhanced CPF Information Hub",
     page_icon="🏠"
 )
 
-# Initialize session state
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
 
-st.title("Enhanced CPF Housing Information Hub")
+st.title("Enhanced CPF Information Hub")
 
-# Sidebar
 st.sidebar.header("About This Enhanced Version")
-st.sidebar.info("""
-This upgraded version combines traditional information retrieval with AI-powered
-analysis using CrewAI. It provides more comprehensive and nuanced responses to
-your CPF housing queries.
-""")
+st.sidebar.info("""This upgraded version combines:
+- CrewAI for sophisticated analysis
+- OpenAI as a fallback mechanism
+- Official CPF sources for accuracy""")
 
-st.sidebar.header("How It Works")
-st.sidebar.write("""
-1. Research Agent analyzes your query
-2. Advisory Agent validates information
-3. Writer Agent creates clear responses
-4. Traditional system provides additional context
-""")
-
-# Main interface
-st.write("### Ask Your CPF Housing Question")
+st.write("### Ask Your CPF Question")
 st.write("Get comprehensive guidance powered by AI and official CPF sources:")
 
 with st.form(key="query_form"):
     user_prompt = st.text_area(
-        "Enter your question:",
-        height=100,
+        "Enter your question:", 
+        height=100, 
         placeholder="e.g., How does CPF housing loan interest work?"
     )
     submit_button = st.form_submit_button("Get Answer")
@@ -327,17 +362,13 @@ with st.form(key="query_form"):
     if submit_button and user_prompt:
         try:
             response = process_user_message(user_prompt)
-            
-            # Add to conversation history
             st.session_state.conversation_history.append({
-                "question": user_prompt,
+                "question": user_prompt, 
                 "answer": response
             })
-            
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
-# Display conversation history
 if st.session_state.conversation_history:
     st.write("### Previous Questions and Answers")
     for item in reversed(st.session_state.conversation_history):
@@ -345,6 +376,5 @@ if st.session_state.conversation_history:
             st.write("Question:", item["question"])
             st.markdown(item["answer"])
 
-# Footer
 st.write("---")
 st.caption("Powered by OpenAI, CrewAI, and Streamlit")
