@@ -27,15 +27,14 @@ ERS_2024 = 298800
 # Constants (keeping your existing constants)
 # Constants (keeping your existing constants)
 CPF_RATES: Dict[str, Tuple[float, float, float]] = {
-    "35 years and below" (0.37, 0.20, 0.17),
-    "Above 35 to 45 years" (0.37, 0.20, 0.17),
+    "35 years and below": (0.37, 0.20, 0.17),
+    "Above 35 to 45 years": (0.37, 0.20, 0.17),
     "Above 45 to 50 years": (0.37, 0.20, 0.17),
     "Above 50 to 55 years": (0.37, 0.20, 0.17),
     "Above 55 to 60 years": (0.31, 0.16, 0.15),
     "Above 60 to 65 years": (0.22, 0.105, 0.115),
     "Above 65 to 70 years": (0.165, 0.075, 0.09),
     "Above 70 years": (0.125, 0.05, 0.075)
-
 }
 
 ALLOCATIONS: Dict[str, Tuple[float, float, float]] = {
