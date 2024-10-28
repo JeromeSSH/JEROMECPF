@@ -381,8 +381,9 @@ def main():
     st.title("Singapore CPF Contribution Calculator")
     st.markdown("""
     ### 2024 CPF Calculator with Insights
-    Calculate your CPF contributions, understand the breakdown, and plan for your future.
-    """)
+     Calculate your CPF contributions, understand the breakdown, and plan for your future.
+    
+    * IMPORTANT: Please key in your Date of Birth at the sidebar on the left before using Calculator or Future Projections""")
     
     # Create tabs for different sections
     tab1, tab2, tab3 = st.tabs(["Calculator", "Future Projections", "Educational Resources"])

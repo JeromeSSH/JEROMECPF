@@ -341,11 +341,9 @@ if 'conversation_history' not in st.session_state:
 
 st.title("Enhanced CPF Information Hub")
 
-st.sidebar.header("About This Enhanced Version")
-st.sidebar.info("""This upgraded version combines:
-- CrewAI for sophisticated analysis
-- OpenAI as a fallback mechanism
-- Official CPF sources for accuracy""")
+st.sidebar.header("Use Case 1- CrewAI RAG")
+st.sidebar.info("""Please See Use Case2 - CPF Calulator:
+""")
 
 st.write("### Ask Your CPF Question")
 st.write("Get comprehensive guidance powered by AI and official CPF sources:")
