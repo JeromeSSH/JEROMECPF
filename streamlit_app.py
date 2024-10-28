@@ -304,15 +304,15 @@ def process_user_message(user_input):
             
             if crew_response and not crew_response.lower().startswith("i apologize") and not crew_response.lower().startswith("error"):
                 combined_response = f"### AI Analysis\n{crew_response}\n\n### Sources\n" + \
-                    "\n".join([f"- {item['url']}" for item in relevant_content:3])
+                    "\n".join([f"- {item['url']}" for item in relevant_content[:3]])
                 return combined_response
 
             # Fallback to OpenAI if CrewAI fails
-            context = "\n\n".join([item['content'] for item in relevant_content:3])
+            context = "\n\n".join([item['content'] for item in relevant_content[:3]])
             openai_response = get_openai_response(user_input, context)
             
             combined_response = f"### AI Response (Fallback)\n{openai_response}\n\n### Sources\n" + \
-                "\n".join([f"- {item['url']}" for item in relevant_content:3])
+                "\n".join([f"- {item['url']}" for item in relevant_content[:3]])
             return combined_response
 
         except Exception as e:
@@ -321,11 +321,11 @@ def process_user_message(user_input):
                 # Final fallback to OpenAI
                 relevant_urls = identify_relevant_url(user_input)
                 relevant_content = get_relevant_content_from_urls(relevant_urls)
-                context = "\n\n".join([item['content'] for item in relevant_content:3])
+                context = "\n\n".join([item['content'] for item in relevant_content[:3]])
                 openai_response = get_openai_response(user_input, context)
                 
                 combined_response = f"### AI Response (Fallback)\n{openai_response}\n\n### Sources\n" + \
-                    "\n".join([f"- {item['url']}" for item in relevant_content:3])
+                    "\n".join([f"- {item['url']}" for item in relevant_content[:3]])
                 return combined_response
             except Exception as e2:
                 return f"I apologize, but I encountered an error processing your request: {str(e2)}"
