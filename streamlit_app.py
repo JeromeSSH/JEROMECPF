@@ -331,126 +331,118 @@ def process_user_message(user_input):
             except Exception as e2:
                 return f"I apologize, but I encountered an error processing your request: {str(e2)}"
 
-# Streamlit UI
+# Page configuration
 st.set_page_config(
     layout="centered",
     page_title="Enhanced CPF Information Hub",
     page_icon="🏠"
 )
 
-# Access the password from the secrets
-stored_password = st.secrets["password"]
-
-# Create a password input field
-password = st.text_input("Enter Password:", type="password")
-
-# Disclaimer using st.expander
-with st.expander("IMPORTANT NOTICE", expanded=False):
-    st.write("""
-    This web application is a prototype developed for educational purposes only. 
-    The information provided here is NOT intended for real-world usage and should not 
-    be relied upon for making any decisions, especially those related to financial, 
-    legal, or healthcare matters.
-
-    Furthermore, please be aware that the LLM may generate inaccurate or incorrect information. 
-    You assume full responsibility for how you use any generated output.
-
-    Always consult with qualified professionals for accurate and personalized advice.
-    """)
-
-# Initialize session state for authentication
+# Initialize session states
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
+if 'conversation_history' not in st.session_state:
+    st.session_state.conversation_history = []
 
-# Check password and update authentication state
-if password == stored_password:
-    st.session_state.authenticated = True
+# Authentication handling
+if not st.session_state.authenticated:
+    st.title("Login")
+    password = st.text_input("Enter Password:", type="password")
+    
+    # Only check password when it's submitted
+    if password:
+        stored_password = st.secrets["password"]
+        if password == stored_password:
+            st.session_state.authenticated = True
+            st.rerun()  # Rerun the app to show the authenticated content
+        else:
+            st.error("Invalid password. Please try again.")
+    
+    # Show disclaimer in login page
+    with st.expander("IMPORTANT NOTICE", expanded=False):
+        st.write("""
+        This web application is a prototype developed for educational purposes only. 
+        The information provided here is NOT intended for real-world usage and should not 
+        be relied upon for making any decisions, especially those related to financial, 
+        legal, or healthcare matters.
 
-# Only show the main app content if authenticated
+        Furthermore, please be aware that the LLM may generate inaccurate or incorrect information. 
+        You assume full responsibility for how you use any generated output.
+
+        Always consult with qualified professionals for accurate and personalized advice.
+        """)
+
+# Main application (only shown when authenticated)
 if st.session_state.authenticated:
-    st.success("Authenticated successfully!")
-    
-    # Initialize conversation history in session state if it doesn't exist
-    if 'conversation_history' not in st.session_state:
-        st.session_state.conversation_history = []
-
     st.title("Enhanced CPF Information Hub")
-
-    # Help Button
-if st.button("❓ Help"):
-    st.write("### Help & How to Use This App")
-    st.write("Welcome to the CPF Information Hub! Here’s how to effectively use this application:")
-
-    # Provide a brief guide
-    st.header("How to Use the App")
-    st.write("""
-    1. **Ask Your CPF Question**: Use the text area to enter any question related to CPF policies, housing, loans, or retirement.
-    2. **Get Answers**: After submitting your question, the AI will provide a comprehensive response based on official CPF sources.
-    3. **Review Previous Questions**: You can view your previous questions and the AI's answers for reference.
-    """)
-
-    # Example Questions
-    st.header("Example Questions")
-    st.write("Here are some example questions you can ask:")
-    example_questions = [
-        "How do I use my CPF savings to purchase a home?",
-        "What are the differences between HDB loans and bank loans?",
-        "Can I use my CPF for downpayment on a private property?",
-        "What are the different CPF account types and their purposes?",
-        "How does the CPF Ordinary Account interest rate compare to the Special Account?",
-        "What grants are available for first-time homebuyers using CPF?",
-    ]
     
-    for question in example_questions:
-        st.write(f"- {question}")
-
-    # Navigation
+    # Sidebar navigation
     page = st.sidebar.selectbox("Select a page", ["Home", "Methodology", "Calculator", "Projections"])
     
+    st.sidebar.header("Use Case 1- CrewAI RAG")
+    st.sidebar.info("Please See Use Case2 - CPF Calculator:")
+    
+    # Help button
+    if st.button("❓ Help"):
+        st.write("### Help & How to Use This App")
+        st.write("Welcome to the CPF Information Hub! Here's how to effectively use this application:")
+        
+        st.header("How to Use the App")
+        st.write("""
+        1. **Ask Your CPF Question**: Use the text area to enter any question related to CPF policies, housing, loans, or retirement.
+        2. **Get Answers**: After submitting your question, the AI will provide a comprehensive response based on official CPF sources.
+        3. **Review Previous Questions**: You can view your previous questions and the AI's answers for reference.
+        """)
+        
+        st.header("Example Questions")
+        example_questions = [
+            "How do I use my CPF savings to purchase a home?",
+            "What are the differences between HDB loans and bank loans?",
+            "Can I use my CPF for downpayment on a private property?",
+            "What are the different CPF account types and their purposes?",
+            "How does the CPF Ordinary Account interest rate compare to the Special Account?",
+            "What grants are available for first-time homebuyers using CPF?",
+        ]
+        for question in example_questions:
+            st.write(f"- {question}")
+    
+    # Page content
     if page == "Home":
-        st.write("This is the home page.")
+        st.write("### Ask Your CPF Question")
+        st.write("Get comprehensive guidance powered by AI and official CPF sources:")
+        
+        with st.form(key="query_form"):
+            user_prompt = st.text_area(
+                "Enter your question:", 
+                height=100, 
+                placeholder="e.g., How does CPF housing loan interest work?"
+            )
+            submit_button = st.form_submit_button("Get Answer")
+            
+            if submit_button and user_prompt:
+                try:
+                    response = process_user_message(user_prompt)
+                    st.session_state.conversation_history.append({
+                        "question": user_prompt, 
+                        "answer": response
+                    })
+                except Exception as e:
+                    st.error(f"An error occurred: {str(e)}")
+        
+        # Display conversation history
+        if st.session_state.conversation_history:
+            st.write("### Previous Questions and Answers")
+            for item in reversed(st.session_state.conversation_history):
+                with st.expander(f"Q: {item['question'][:100]}..."):
+                    st.write("Question:", item["question"])
+                    st.markdown(item["answer"])
+    
     elif page == "Methodology":
         st.write("This is the methodology page.")
     elif page == "Calculator":
         st.write("This is the calculator page.")
     elif page == "Projections":
         st.write("This is the projections page.")
-
-    st.sidebar.header("Use Case 1- CrewAI RAG")
-    st.sidebar.info("""Please See Use Case2 - CPF Calculator:
-    """)
-
-    st.write("### Ask Your CPF Question")
-    st.write("Get comprehensive guidance powered by AI and official CPF sources:")
-
-    with st.form(key="query_form"):
-        user_prompt = st.text_area(
-            "Enter your question:", 
-            height=100, 
-            placeholder="e.g., How does CPF housing loan interest work?"
-        )
-        submit_button = st.form_submit_button("Get Answer")
-
-        if submit_button and user_prompt:
-            try:
-                response = process_user_message(user_prompt)
-                st.session_state.conversation_history.append({
-                    "question": user_prompt, 
-                    "answer": response
-                })
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
-
-    if st.session_state.conversation_history:
-        st.write("### Previous Questions and Answers")
-        for item in reversed(st.session_state.conversation_history):
-            with st.expander(f"Q: {item['question'][:100]}..."):
-                st.write("Question:", item["question"])
-                st.markdown(item["answer"])
-
+    
     st.write("---")
     st.caption("Powered by OpenAI, CrewAI, and Streamlit")
-
-else:
-    if password:  # Only show error if user has attempted to enter a password
-        st.error("Invalid password. Please try again.")
