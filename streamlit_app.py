@@ -121,7 +121,7 @@ CPF_URLS = {
 }
 
 # Enhanced URL handling and content fetching functions
-def identify_relevant_url(user_message, urls_dict=CPF_URLS):
+def identify_relevant_url(user_message, urls_dict=CPF_URLS,limit=5):
     """
     Identify relevant URLs based on user query using keyword matching
     """
@@ -133,6 +133,8 @@ def identify_relevant_url(user_message, urls_dict=CPF_URLS):
             # Check if any keyword from the user message appears in the URL
             if any(keyword in url.lower() for keyword in keywords):
                 relevant_urls.append(url)
+            if len(relevant_urls) >= limit:  # Limit the number of relevant URLs
+                return relevant_urls
     
     # If no specific URLs found, return general info URLs
     return relevant_urls if relevant_urls else urls_dict["general_info"]
@@ -179,7 +181,7 @@ def get_relevant_content_from_urls(urls):
             # Process and clean content
             cleaned_content = ' '.join(content.split())  # Remove extra whitespace
             # Truncate content if too long (optional)
-            max_length = 8000  # Adjust as needed
+            max_length = 1000  # Adjust as needed
             if len(cleaned_content) > max_length:
                 cleaned_content = cleaned_content[:max_length] + "..."
             
@@ -302,15 +304,15 @@ def process_user_message(user_input):
             
             if crew_response and not crew_response.lower().startswith("i apologize") and not crew_response.lower().startswith("error"):
                 combined_response = f"### AI Analysis\n{crew_response}\n\n### Sources\n" + \
-                    "\n".join([f"- {item['url']}" for item in relevant_content])
+                    "\n".join([f"- {item['url']}" for item in relevant_content:3])
                 return combined_response
 
             # Fallback to OpenAI if CrewAI fails
-            context = "\n\n".join([item['content'] for item in relevant_content])
+            context = "\n\n".join([item['content'] for item in relevant_content:3])
             openai_response = get_openai_response(user_input, context)
             
             combined_response = f"### AI Response (Fallback)\n{openai_response}\n\n### Sources\n" + \
-                "\n".join([f"- {item['url']}" for item in relevant_content])
+                "\n".join([f"- {item['url']}" for item in relevant_content:3])
             return combined_response
 
         except Exception as e:
@@ -319,11 +321,11 @@ def process_user_message(user_input):
                 # Final fallback to OpenAI
                 relevant_urls = identify_relevant_url(user_input)
                 relevant_content = get_relevant_content_from_urls(relevant_urls)
-                context = "\n\n".join([item['content'] for item in relevant_content])
+                context = "\n\n".join([item['content'] for item in relevant_content:3])
                 openai_response = get_openai_response(user_input, context)
                 
                 combined_response = f"### AI Response (Fallback)\n{openai_response}\n\n### Sources\n" + \
-                    "\n".join([f"- {item['url']}" for item in relevant_content])
+                    "\n".join([f"- {item['url']}" for item in relevant_content:3])
                 return combined_response
             except Exception as e2:
                 return f"I apologize, but I encountered an error processing your request: {str(e2)}"
