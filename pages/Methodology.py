@@ -136,7 +136,7 @@ def show_methodology_page():
         G --> I[Response Formatter]
         I --> J[User Interface]
     """
-    st_mermaid(architecture_flow, height=1400)
+    st_mermaid(architecture_flow, height=1100)
 
     # Future CPF Projections Tool Implementation
     st.header("Future CPF Projections Tool Implementation")
