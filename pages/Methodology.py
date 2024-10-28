@@ -37,7 +37,7 @@ def show_methodology_page():
         H --> I[Display Results]
         I --> J[Update History]
     """
-    st_mermaid(query_flow)
+    st_mermaid(query_flow, height=1000)
 
     # CrewAI Implementation
     st.header("CrewAI Implementation")
@@ -51,7 +51,7 @@ def show_methodology_page():
         F --> C
         D --> G[Final Response]
     """
-    st_mermaid(crew_flow)
+    st_mermaid(crew_flow, height=600)
 
     # Detailed Implementation
     st.header("Detailed Implementation")
@@ -136,7 +136,7 @@ def show_methodology_page():
         G --> I[Response Formatter]
         I --> J[User Interface]
     """
-    st_mermaid(architecture_flow)
+    st_mermaid(architecture_flow, height=1400)
 
     # Future CPF Projections Tool Implementation
     st.header("Future CPF Projections Tool Implementation")
@@ -154,7 +154,7 @@ def show_methodology_page():
         F --> G[Display Insights]
         G --> H[User Feedback Loop]
     """
-    st_mermaid(projection_flow)
+    st_mermaid(projection_flow, height=700)
 
     st.header("Detailed Implementation of Singapore CPF Contribution Calculator and Future Projections")
 
