@@ -21,7 +21,7 @@ def get_openai_api_key():
     return api_key
 
 # Initialize the OpenAI client
-client = OpenAI(api_key=get_openai_api_key(), model="gpt-4o-mini-2024-07-18")  # or another appropriate model)
+client = OpenAI(api_key=get_openai_api_key()")  # or another appropriate model)
 
 # CPF-related keywords for query validation
 CPF_KEYWORDS = {
@@ -35,16 +35,6 @@ def is_cpf_related(query):
     """Check if the query is CPF-related based on keywords"""
     query_words = set(query.lower().split())
     return bool(query_words.intersection(CPF_KEYWORDS))
-
-def get_openai_api_key():
-    api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        st.error("No OpenAI API key found. Please set it in .streamlit/secrets.toml or as an environment variable.")
-        st.stop()
-    return api_key
-
-# Initialize the OpenAI client with the desired model
-openai.api_key = get_openai_api_key()
 
 def get_openai_response(query, context):
     """Get response from OpenAI as a fallback"""
@@ -70,6 +60,7 @@ def get_openai_response(query, context):
 
     except Exception as e:
         return f"Error getting OpenAI response: {str(e)}"
+
 
 CPF_URLS = {
     "housing_policies": [
