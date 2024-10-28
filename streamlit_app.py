@@ -21,7 +21,7 @@ def get_openai_api_key():
     return api_key
 
 # Initialize the OpenAI client
-client = OpenAI(api_key=get_openai_api_key())
+client = OpenAI(api_key=get_openai_api_key(),model="gpt-4o-mini",  # or another appropriate model)
 
 # CPF-related keywords for query validation
 CPF_KEYWORDS = {
@@ -50,7 +50,6 @@ def get_openai_response(query, context):
         ]
 
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # or another appropriate model
             messages=messages,
             temperature=0.5,
             max_tokens=1000
