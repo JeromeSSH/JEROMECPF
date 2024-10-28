@@ -341,67 +341,71 @@ stored_password = st.secrets["password"]
 # Create a password input field
 password = st.text_input("Enter Password:", type="password")
 
-# Authenticate the user
+# Initialize session state for authentication
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+
+# Check password and update authentication state
 if password == stored_password:
+    st.session_state.authenticated = True
+
+# Only show the main app content if authenticated
+if st.session_state.authenticated:
     st.success("Authenticated successfully!")
-    # Place your main app content here
-    st.title("Welcome to the CPF Information Hub")
-    # Navigation to other pages
-    # For example, use a sidebar for navigation
+    
+    # Initialize conversation history in session state if it doesn't exist
+    if 'conversation_history' not in st.session_state:
+        st.session_state.conversation_history = []
+
+    st.title("Enhanced CPF Information Hub")
+
+    # Navigation
     page = st.sidebar.selectbox("Select a page", ["Home", "Methodology", "Calculator", "Projections"])
     
     if page == "Home":
-        # Home page content
         st.write("This is the home page.")
     elif page == "Methodology":
-        # Methodology page content
         st.write("This is the methodology page.")
     elif page == "Calculator":
-        # Calculator page content
         st.write("This is the calculator page.")
     elif page == "Projections":
-        # Projections page content
         st.write("This is the projections page.")
+
+    st.sidebar.header("Use Case 1- CrewAI RAG")
+    st.sidebar.info("""Please See Use Case2 - CPF Calculator:
+    """)
+
+    st.write("### Ask Your CPF Question")
+    st.write("Get comprehensive guidance powered by AI and official CPF sources:")
+
+    with st.form(key="query_form"):
+        user_prompt = st.text_area(
+            "Enter your question:", 
+            height=100, 
+            placeholder="e.g., How does CPF housing loan interest work?"
+        )
+        submit_button = st.form_submit_button("Get Answer")
+
+        if submit_button and user_prompt:
+            try:
+                response = process_user_message(user_prompt)
+                st.session_state.conversation_history.append({
+                    "question": user_prompt, 
+                    "answer": response
+                })
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+
+    if st.session_state.conversation_history:
+        st.write("### Previous Questions and Answers")
+        for item in reversed(st.session_state.conversation_history):
+            with st.expander(f"Q: {item['question'][:100]}..."):
+                st.write("Question:", item["question"])
+                st.markdown(item["answer"])
+
+    st.write("---")
+    st.caption("Powered by OpenAI, CrewAI, and Streamlit")
+
 else:
-    if password:
+    if password:  # Only show error if user has attempted to enter a password
         st.error("Invalid password. Please try again.")
-
-if 'conversation_history' not in st.session_state:
-    st.session_state.conversation_history = []
-
-st.title("Enhanced CPF Information Hub")
-
-st.sidebar.header("Use Case 1- CrewAI RAG")
-st.sidebar.info("""Please See Use Case2 - CPF Calulator:
-""")
-
-st.write("### Ask Your CPF Question")
-st.write("Get comprehensive guidance powered by AI and official CPF sources:")
-
-with st.form(key="query_form"):
-    user_prompt = st.text_area(
-        "Enter your question:", 
-        height=100, 
-        placeholder="e.g., How does CPF housing loan interest work?"
-    )
-    submit_button = st.form_submit_button("Get Answer")
-
-    if submit_button and user_prompt:
-        try:
-            response = process_user_message(user_prompt)
-            st.session_state.conversation_history.append({
-                "question": user_prompt, 
-                "answer": response
-            })
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-
-if st.session_state.conversation_history:
-    st.write("### Previous Questions and Answers")
-    for item in reversed(st.session_state.conversation_history):
-        with st.expander(f"Q: {item['question'][:100]}..."):
-            st.write("Question:", item["question"])
-            st.markdown(item["answer"])
-
-st.write("---")
-st.caption("Powered by OpenAI, CrewAI, and Streamlit")
