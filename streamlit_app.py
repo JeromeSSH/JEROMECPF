@@ -191,7 +191,7 @@ def get_relevant_content_from_urls(urls):
     return content_list
 
 # Create custom WebsiteSearchTool for CPF content
-class CPFWebsiteSearchTool(WebsiteSearchTool):
+class CPFWebsiteSearchTool():
     def __init__(self, base_urls=None):
         super().__init__(base_urls if base_urls else CPF_URLS["housing_policies"][0])
         self.all_urls = [url for urls in CPF_URLS.values() for url in urls]
