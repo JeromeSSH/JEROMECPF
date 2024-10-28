@@ -375,9 +375,7 @@ if not st.session_state.authenticated:
 # Main application (only shown when authenticated)
 if st.session_state.authenticated:
     st.title("Enhanced CPF Information Hub")
-    
-    # Sidebar navigation
-    page = st.sidebar.selectbox("Select a page", ["Home", "Methodology", "Calculator", "Projections"])
+
     
     st.sidebar.header("Use Case 1- CrewAI RAG")
     st.sidebar.info("Please See Use Case2 - CPF Calculator:")
@@ -437,12 +435,7 @@ if st.session_state.authenticated:
                     st.write("Question:", item["question"])
                     st.markdown(item["answer"])
     
-    elif page == "Methodology":
-        st.write("This is the methodology page.")
-    elif page == "Calculator":
-        st.write("This is the calculator page.")
-    elif page == "Projections":
-        st.write("This is the projections page.")
+
     
     st.write("---")
     st.caption("Powered by OpenAI, CrewAI, and Streamlit")
