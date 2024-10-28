@@ -25,24 +25,28 @@ ERS_2024 = 298800
 
 
 # Constants (keeping your existing constants)
+# Constants (keeping your existing constants)
 CPF_RATES: Dict[str, Tuple[float, float, float]] = {
-    "35 years and below": (0.37, 0.20, 0.17),
-    "Above 35 to 45 years": (0.37, 0.20, 0.17),
-    "Above 45 to 50 years": (0.37, 0.20, 0.17),
+    "35 years and below" (0.37, 0.20, 0.17)
+    "Above 35 to 45 years" (0.37, 0.20, 0.17)
+    "Above 45 to 50 years": (0.37, 0.20, 0.17)
     "Above 50 to 55 years": (0.37, 0.20, 0.17),
-    "Above 55 to 60 years": (0.26, 0.13, 0.13),
-    "Above 60 to 65 years": (0.165, 0.085, 0.08),
-    "Above 65 years": (0.125, 0.075, 0.05)
+    "Above 55 to 60 years": (0.31, 0.16, 0.15),
+    "Above 60 to 65 years": (0.22, 0.105, 0.115),
+    "Above 65 to 70 years": (0.165, 0.075, 0.09),
+    "Above 70 years": (0.125, 0.05, 0.075)
+
 }
 
 ALLOCATIONS: Dict[str, Tuple[float, float, float]] = {
-    "35 years and below": (0.08108, 0.23243, 0.68649),
-    "Above 35 to 45 years": (0.08108, 0.23243, 0.68649),
-    "Above 45 to 50 years": (0.08108, 0.23243, 0.68649),
-    "Above 50 to 55 years": (0.08108, 0.23243, 0.68649),
-    "Above 55 to 60 years": (0.10577, 0.13462, 0.75961),
-    "Above 60 to 65 years": (0.12121, 0.03030, 0.84849),
-    "Above 65 years": (0.16000, 0.00000, 0.84000)
+    "35 years and below": (0.6217, 0.1621, 0.2162),
+    "Above 35 to 45 years": (0.5677, 0.1891, 0.2432),
+    "Above 45 to 50 years": (0.5136, 0.2162, 0.2702),
+    "Above 50 to 55 years": (0.4055, 0.3108, 0.2837),
+    "Above 55 to 60 years": (0.3872, 0.2741, 0.3387),
+    "Above 60 to 65 years": (0.1592, 0.3636, 0.4772),
+    "Above 65 to 70 years": (0.0607, 0.303, 0.6363),
+    "Above 70 years": (0.08, 0.08, 0.84)
 }
 
 # CPF Life milestone constants
@@ -75,8 +79,10 @@ def get_age_group(birth_date: datetime.date) -> str:
         return "Above 55 to 60 years"
     elif age <= 65:
         return "Above 60 to 65 years"
+    elif age <= 70:
+        return "Above 65 to 70 years"
     else:
-        return "Above 65 years"
+        return "Above 70 years"
 
 def calculate_contributions(
     ordinary_wages: float,
@@ -216,10 +222,12 @@ def calculate_future_balance(
         if month % 12 == 0 and month > 0:
             monthly_contribution *= (1 + annual_increment)
         
-        # Calculate monthly allocation
-        oa_contribution = monthly_contribution * 0.68649
-        sa_contribution = monthly_contribution * 0.23243
-        ma_contribution = monthly_contribution * 0.08108
+        # Calculate monthly allocation based on new allocation ratios
+        medisave_rate, special_rate, ordinary_rate = ALLOCATIONS[get_age_group(datetime.date.today())]
+        oa_contribution = monthly_contribution * ordinary_rate
+        sa_contribution = monthly_contribution * special_rate
+        ma_contribution = monthly_contribution * medisave_rate
+
         
         # Add interest (monthly)
         oa_balance = (oa_balance + oa_contribution) * (1 + interest_rates["OA"]/12)
@@ -583,15 +591,13 @@ def main():
             3. Whether you're an employee, self-employed, or both
             
             #### Current Contribution Rates (2024)
-            | Age Group | Total Rate | Employee's Share | Employer's Share |
-            |-----------|------------|------------------|------------------|
-            | ≤ 35 years | 37% | 20% | 17% |
-            | 35-45 years | 37% | 20% | 17% |
-            | 45-50 years | 37% | 20% | 17% |
-            | 50-55 years | 37% | 20% | 17% |
-            | 55-60 years | 26% | 13% | 13% |
-            | 60-65 years | 16.5% | 8.5% | 8% |
-            | > 65 years | 12.5% | 7.5% | 5% |
+            | Age Group           | Employer's Share (%) | Employee's Share (%) | Total (%) |
+            |---------------------|----------------------|----------------------|-----------|
+            | 55 and below        | 17                   | 20                   | 37        |
+            | Above 55 to 60      | 15                   | 16                   | 31        |
+            | Above 60 to 65      | 11.5                 | 10.5                 | 22        |
+            | Above 65 to 70      | 9                    | 7.5                  | 16.5      |
+            | Above 70            | 7.5                  | 5                    | 12.5      |
             """)
 
         # CPF Account Types
