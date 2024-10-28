@@ -9,6 +9,36 @@ from crewai import Agent, Task, Crew, Process
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+# Access the password from the secrets
+stored_password = st.secrets["password"]
+
+# Create a password input field
+password = st.text_input("Enter Password:", type="password")
+
+# Authenticate the user
+if password == stored_password:
+    st.success("Authenticated successfully!")
+    # Place your main app content here
+    st.title("Welcome to the CPF Information Hub")
+    # Navigation to other pages
+    # For example, use a sidebar for navigation
+    page = st.sidebar.selectbox("Select a page", ["Home", "Methodology", "Calculator", "Projections"])
+    
+    if page == "Home":
+        # Home page content
+        st.write("This is the home page.")
+    elif page == "Methodology":
+        # Methodology page content
+        st.write("This is the methodology page.")
+    elif page == "Calculator":
+        # Calculator page content
+        st.write("This is the calculator page.")
+    elif page == "Projections":
+        # Projections page content
+        st.write("This is the projections page.")
+else:
+    if password:
+        st.error("Invalid password. Please try again.")
 
 # Load environment variables
 load_dotenv()
