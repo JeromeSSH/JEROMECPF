@@ -372,47 +372,6 @@ if not st.session_state.authenticated:
         Always consult with qualified professionals for accurate and personalized advice.
         """)
 
-# Page configuration
-st.set_page_config(
-    layout="centered",
-    page_title="Enhanced CPF Information Hub",
-    page_icon="🏠"
-)
-
-# Initialize session states
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-if 'conversation_history' not in st.session_state:
-    st.session_state.conversation_history = []
-
-# Authentication handling
-if not st.session_state.authenticated:
-    st.title("Login")
-    password = st.text_input("Enter Password:", type="password")
-    
-    # Only check password when it's submitted
-    if password:
-        stored_password = st.secrets["password"]
-        if password == stored_password:
-            st.session_state.authenticated = True
-            st.rerun()  # Rerun the app to show the authenticated content
-        else:
-            st.error("Invalid password. Please try again.")
-    
-    # Show disclaimer in login page
-    with st.expander("IMPORTANT NOTICE", expanded=False):
-        st.write("""
-        This web application is a prototype developed for educational purposes only. 
-        The information provided here is NOT intended for real-world usage and should not 
-        be relied upon for making any decisions, especially those related to financial, 
-        legal, or healthcare matters.
-
-        Furthermore, please be aware that the LLM may generate inaccurate or incorrect information. 
-        You assume full responsibility for how you use any generated output.
-
-        Always consult with qualified professionals for accurate and personalized advice.
-        """)
-
 # Main application (only shown when authenticated)
 if st.session_state.authenticated:
     st.title("Enhanced CPF Information Hub")
