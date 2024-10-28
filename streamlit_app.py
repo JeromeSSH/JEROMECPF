@@ -21,7 +21,7 @@ def get_openai_api_key():
     return api_key
 
 # Initialize the OpenAI client
-client = OpenAI(api_key=get_openai_api_key()")  # or another appropriate model)
+client = OpenAI(api_key=get_openai_api_key())  
 
 # CPF-related keywords for query validation
 CPF_KEYWORDS = {
